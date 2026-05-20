@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Booking Form — Public Booking UI
 
-## Getting Started
+> Multi-step public booking form for cleaning services. Light mode, teal accent, 7-step flow with live price calculation.
 
-First, run the development server:
+## Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Next.js 16** (App Router, static export)
+- **TypeScript**
+- **Tailwind CSS v4**
+- **Lucide React** (icons)
+- **Geist** font (Next.js built-in)
+
+## Project Structure
+
+```
+app/
+├── layout.tsx              # Root layout — white bg, Geist font
+├── page.tsx                # Main booking page — step router + layout
+├── globals.css             # Tailwind imports + light theme
+├── hooks/
+│   └── useBookingForm.ts   # Central state for all 7 steps
+├── components/
+│   ├── Sidebar.tsx         # Desktop step sidebar (280px)
+│   ├── MobileStepper.tsx   # Horizontal stepper for mobile
+│   └── PriceSummary.tsx    # Sticky right panel with pricing + trust signals
+└── steps/
+    ├── Step1Service.tsx    # Service cards (Standard, Deep, Move-in/out, Post-Construction)
+    ├── Step2Home.tsx       # Bed/bath counters, sqft, home type
+    ├── Step3Frequency.tsx  # One-time / Weekly / Bi-weekly / Monthly
+    ├── Step4Addons.tsx     # Add-on checkboxes (fridge, oven, cabinets, etc.)
+    ├── Step5Pets.tsx       # Pet info (yes/no, count, type, shedding)
+    ├── Step6DateTime.tsx   # Calendar picker + time slot chips
+    └── Step7Confirm.tsx    # Summary + contact/address inputs + Book Now
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How to Run
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cd booking-form-final
+npm install
+npm run dev          # localhost:3012
+npm run build        # static export to ./dist
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## How to Deploy
 
-## Learn More
+### Vercel (recommended)
+```bash
+npx vercel --prod
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Any static host (Netlify, Cloudflare Pages, etc.)
+```bash
+npm run build
+# Upload ./dist folder
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Key Patterns
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Adding a New Step
+1. Create `app/steps/Step8NewStep.tsx`
+2. Add the step to `useBookingForm.ts`:
+   - Extend `FormData` interface
+   - Add validation in `canProceed()`
+3. Wire it in `app/page.tsx` switch statement
+4. Add label/icon in `app/components/Sidebar.tsx`
 
-## Deploy on Vercel
+### Modifying Pricing
+Edit `app/components/PriceSummary.tsx`. The formula is:
+- Base price from selected service
+- + $15 per bedroom, + $20 per bathroom
+- + add-on prices
+- × frequency multiplier (weekly 0.85, bi-weekly 0.90, monthly 0.95)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Changing Services
+Edit the `services` array in `app/steps/Step1Service.tsx`. Each service needs:
+- `id`, `emoji`, `title`, `description`, `price`, `popular?`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Known Limitations
+
+- All data is client-side mock state. No backend/API integration yet.
+- "Book Now" on Step 7 shows an `alert()` instead of submitting to a server.
+- No form validation on contact fields (just visual inputs).
+- No persistent storage (refresh loses progress).
+- Images are unoptimized due to static export.
+
+## Future Goals
+
+See `ROADMAP.md` in this directory.
